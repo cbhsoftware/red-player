@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RED Player</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(-45deg, #1f1c2c, #928dab, #1f4037, #99f2c8);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: white;
+    min-height: 100vh;
+  }
+
+  @keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .radio-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 15px;
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    transition: transform 0.3s;
+    cursor: pointer;
+  }
+
+  .radio-card:hover {
+    transform: scale(1.05);
+  }
+
+  .radio-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  #player-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.6);
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+  }
+
+  audio {
+    width: 300px;
+  }
+
+  h1 {
+    text-align: center;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<h1>RED Player</h1>
+<div class="container" id="radio-container"></div>
+
+<div id="player-container">
+  <audio id="audio-player" controls>
+    <source src="" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <span id="current-station">Select a station</span>
+</div>
+
+<script>
+const stations = [
+  { name: "Absolute 80s", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Bauer-Media/Absolute-Radio/Absolute-80s.png", url: "http://bauermedia.lakeside.party/absolute80shd" },
+{ name: "Absolute Radio 90s", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Bauer-Media/Absolute-Radio/Absolute-90s.png", url: "http://bauermedia.lakeside.party/absolute90shd" },
+{ name: "Absolute Radio 00s", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Bauer-Media/Absolute-Radio/Absolute-00s.png", url: "http://bauermedia.lakeside.party/absolute00shd" },
+{ name: "Absolute Radio 10s", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Bauer-Media/Absolute-Radio/Absolute-10s.png", url: "http://bauermedia.lakeside.party/absolute10shd" },
+{ name: "Absolute Radio 20s", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Bauer-Media/Absolute-Radio/Absolute-20s.png", url: "http://bauermedia.lakeside.party/absolute20shd" },
+{ name: "BBC Radio 1", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-1.png", url: "http://radio.lakeside.party/bbc/radio1.mpd" },
+{ name: "BBC Radio 1 Anthems", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-1-Anthems.png", url: "http://radio.lakeside.party/bbc/radio1anthems.mpd" },
+{ name: "BBC Radio 1 Dance", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-1-Dance.png", url: "http://radio.lakeside.party/bbc/radio1dance.mpd" },
+{ name: "BBC Radio 1 Xtra", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-1Xtra.png", url: "http://radio.lakeside.party/bbc/radio1xtra.mpd" },
+{ name: "BBC Radio 2", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-2.png", url: "http://radio.lakeside.party/bbc/radio2.mpd" },
+{ name: "BBC Radio 3", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-3.png", url: "http://radio.lakeside.party/bbc/radio3.mpd" },
+{ name: "BBC Radio 3 Unwind", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-3-Unwind.png", url: "http://radio.lakeside.party/bbc/radio3unwind.mpd" },
+{ name: "BBC Radio 4", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-4.png", url: "http://radio.lakeside.party/bbc/radio4.mpd" },
+{ name: "BBC Radio 4 Extra", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-4-Extra.png", url: "http://radio.lakeside.party/bbc/radio4extra.mpd" },
+{ name: "BBC Radio 5 Live", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-5-Live.png", url: "http://radio.lakeside.party/bbc/radio5live.mpd" },
+{ name: "BBC Radio 5 Live Sports Extra", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-5-Sports-Extra.png", url: "http://radio.lakeside.party/bbc/radio5livese.mpd" },
+{ name: "BBC Radio 6 Music", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/BBC/National/BBC-Radio-6-Music.png", url: "https://radio.lakeside.party/bbc/radio6music.mpd" },
+{ name: "Capital UK", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/Capital/Capital.png", url: "https://icecast.thisisdax.com/CapitalUKMP3" },
+{ name: "CapitalXTRA", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/Capital/CapitalXTRA.png", url: "https://icecast.thisisdax.com/CapitalXTRANationalMP3" },
+{ name: "CapitalXTRA Reloaded", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/Capital/CapitalXTRA-Reloaded.png", url: "https://icecast.thisisdax.com/CapitalXTRAReloadedMP3" },
+{ name: "Capital Chill", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/Capital/Capital-Chill.png", url: "https://icecast.thisisdax.com/CapitalChillMP3" },
+{ name: "Capital Dance", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/Capital/Capital-Dance.png", url: "https://icecast.thisisdax.com/CapitalDanceMP3" },
+{ name: "Capital Anthems", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/Capital/Capital-Anthems.png", url: "https://icecast.thisisdax.com/CapitalAnthemsMP3" },
+{ name: "ClassicFM", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM.png", url: "https://icecast.thisisdax.com/ClassicFMMP3" },
+{ name: "ClassicFM At The Movies", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-At-The-Movies.png", url: "https://icecast.thisisdax.com/ClassicFM-M-Movies" },
+{ name: "ClassicFM Calm", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Calm.png", url: "https://icecast.thisisdax.com/ClassicFMCalmMP3" },
+{ name: "ClassicFM Essential Classical", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Essentials.png", url: "https://icecast.thisisdax.com/ClassicFM-M-Essential" },
+{ name: "ClassicFM Hall of Fame", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Hall-Of-Fame.png", url: "https://icecast.thisisdax.com/ClassicFM-M-HOF" },
+{ name: "ClassicFM Movies", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Movies.png", url: "https://icecast.thisisdax.com/ClassicFMMoviesMP3" },
+{ name: "ClassicFM Music For Pets", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Pets.png", url: "https://icecast.thisisdax.com/ClassicFM-M-Pets" },
+{ name: "ClassicFM Relax", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Relax.png", url: "https://icecast.thisisdax.com/ClassicFM-M-Relax" },
+{ name: "ClassicFM Revision", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Revision.png", url: "https://icecast.thisisdax.com/ClassicFM-M-Revision" },
+{ name: "ClassicFM Video Games", logo: "https://typicalnerds.uk/radio-logos/United-Kingdom/Global-Media-And-Entertainment/ClassicFM/ClassicFM-Video-Games.png", url: "https://icecast.thisisdax.com/ClassicFM-M-Gaming" },
+];
+
+const container = document.getElementById("radio-container");
+const audioPlayer = document.getElementById("audio-player");
+const currentStation = document.getElementById("current-station");
+
+stations.forEach(station => {
+  const card = document.createElement("div");
+  card.className = "radio-card";
+  card.innerHTML = `
+    <img src="${station.logo}" alt="${station.name} Logo">
+    <h3>${station.name}</h3>
+  `;
+  
+  card.addEventListener("click", () => {
+    audioPlayer.src = station.url;
+    audioPlayer.play();
+    currentStation.textContent = station.name;
+  });
+
+  container.appendChild(card);
+});
+</script>
+
+</body>
+</html>
